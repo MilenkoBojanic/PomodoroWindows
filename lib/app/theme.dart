@@ -22,7 +22,6 @@ ThemeData buildDisplayTheme() {
       surface: AppColors.surface,
       onSurface: AppColors.textPrimary,
     ),
-    fontFamily: 'Segoe UI',
     textTheme: const TextTheme(
       displayLarge: TextStyle(
         fontSize: 48,

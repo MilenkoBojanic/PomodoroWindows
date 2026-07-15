@@ -66,10 +66,12 @@ class RunwayPanel extends StatelessWidget {
                             separatorBuilder: (_, __) =>
                                 const SizedBox(height: 8),
                             itemBuilder: (context, index) {
+                              final isFirstUpcoming = index == 0;
                               return ReservationCard(
                                 reservation: schedule.upcoming[index],
                                 status: ReservationStatus.upcoming,
-                                compact: true,
+                                compact: !isFirstUpcoming,
+                                fontScale: isFirstUpcoming ? 2 : 1,
                               );
                             },
                           ),

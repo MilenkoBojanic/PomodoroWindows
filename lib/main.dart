@@ -1,4 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:pomodoro_windows/app/theme.dart';
 import 'package:pomodoro_windows/firebase_options.dart';
@@ -10,6 +12,24 @@ import 'package:window_manager/window_manager.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  if (_isDesktop) {
+    await _initDesktopWindow();
+  }
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  runApp(const PomodoroWindowsApp());
+}
+
+bool get _isDesktop =>
+    !kIsWeb &&
+    (defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.linux);
+
+Future<void> _initDesktopWindow() async {
   await windowManager.ensureInitialized();
 
   const windowOptions = WindowOptions(
@@ -24,12 +44,6 @@ Future<void> main() async {
     await windowManager.show();
     await windowManager.focus();
   });
-
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
-  runApp(const PomodoroWindowsApp());
 }
 
 class PomodoroWindowsApp extends StatelessWidget {

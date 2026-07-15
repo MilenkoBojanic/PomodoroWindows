@@ -1,5 +1,5 @@
 name: pomodoro_windows
-description: Windows display app for Pomodoro car wash — shows live runway schedule.
+description: Display app for Pomodoro car wash — shows live runway schedule on Windows, Web, and Android.
 publish_to: "none"
 version: 1.0.0+1
 
