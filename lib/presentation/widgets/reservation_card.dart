@@ -8,14 +8,12 @@ class ReservationCard extends StatelessWidget {
   final Reservation reservation;
   final ReservationStatus status;
   final bool compact;
-  final double fontScale;
 
   const ReservationCard({
     super.key,
     required this.reservation,
     required this.status,
     this.compact = false,
-    this.fontScale = 1,
   });
 
   @override
@@ -25,13 +23,9 @@ class ReservationCard extends StatelessWidget {
     final color = _statusColor();
     final textTheme = Theme.of(context).textTheme;
 
-    return MediaQuery(
-      data: MediaQuery.of(context).copyWith(
-        textScaler: TextScaler.linear(fontScale),
-      ),
-      child: Container(
+    return Container(
         width: double.infinity,
-        padding: EdgeInsets.all(compact ? 12 : 20),
+        padding: EdgeInsets.all(compact ? 8 : 14),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(12),
@@ -53,7 +47,7 @@ class ReservationCard extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: compact ? 8 : 12),
+            SizedBox(height: compact ? 5 : 8),
             Text(
               reservation.vehicle.name,
               style: textTheme.titleMedium?.copyWith(
@@ -62,7 +56,7 @@ class ReservationCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            SizedBox(height: compact ? 4 : 6),
+            SizedBox(height: compact ? 3 : 5),
             Text(
               reservation.primaryService.name,
               style: textTheme.bodyMedium?.copyWith(
@@ -72,7 +66,7 @@ class ReservationCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
             if (reservation.services.isNotEmpty) ...[
-              SizedBox(height: compact ? 2 : 4),
+              SizedBox(height: compact ? 2 : 3),
               Text(
                 reservation.services.map((service) => service.name).join(', '),
                 style: textTheme.bodySmall,
@@ -80,7 +74,7 @@ class ReservationCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ],
-            SizedBox(height: compact ? 4 : 6),
+            SizedBox(height: compact ? 3 : 5),
             Text(
               '${priceFormat.format(reservation.totalPrice)} KM',
               style: textTheme.labelLarge?.copyWith(
@@ -96,7 +90,6 @@ class ReservationCard extends StatelessWidget {
             ],
           ],
         ),
-      ),
     );
   }
 
