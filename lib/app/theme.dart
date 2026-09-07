@@ -24,42 +24,46 @@ ThemeData buildDisplayTheme() {
     ),
     textTheme: const TextTheme(
       displayLarge: TextStyle(
-        fontSize: 48,
+        fontSize: 32,
         fontWeight: FontWeight.bold,
         color: AppColors.textPrimary,
       ),
       headlineLarge: TextStyle(
-        fontSize: 36,
+        fontSize: 24,
         fontWeight: FontWeight.w600,
         color: AppColors.textPrimary,
       ),
       headlineMedium: TextStyle(
-        fontSize: 28,
+        fontSize: 18,
         fontWeight: FontWeight.w600,
         color: AppColors.textPrimary,
       ),
       titleLarge: TextStyle(
-        fontSize: 24,
+        fontSize: 16,
         fontWeight: FontWeight.w500,
         color: AppColors.textPrimary,
       ),
       titleMedium: TextStyle(
-        fontSize: 20,
+        fontSize: 14,
         fontWeight: FontWeight.w500,
         color: AppColors.textPrimary,
       ),
       bodyLarge: TextStyle(
-        fontSize: 18,
+        fontSize: 13,
         color: AppColors.textSecondary,
       ),
       bodyMedium: TextStyle(
-        fontSize: 16,
+        fontSize: 12,
+        color: AppColors.textSecondary,
+      ),
+      bodySmall: TextStyle(
+        fontSize: 11,
         color: AppColors.textSecondary,
       ),
       labelLarge: TextStyle(
-        fontSize: 14,
+        fontSize: 11,
         fontWeight: FontWeight.w600,
-        letterSpacing: 1.2,
+        letterSpacing: 1.0,
         color: AppColors.textSecondary,
       ),
     ),

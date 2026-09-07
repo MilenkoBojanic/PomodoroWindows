@@ -17,7 +17,7 @@ class DisplayHeader extends StatelessWidget {
     final dateFormat = DateFormat('EEEE, d. MMMM yyyy.', 'bs');
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
       decoration: const BoxDecoration(
         color: AppColors.surface,
         border: Border(
@@ -26,8 +26,8 @@ class DisplayHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Image.asset('assets/logo_main.png', height: 56),
-          const SizedBox(width: 24),
+          Image.asset('assets/logo_main.png', height: 36),
+          const SizedBox(width: 16),
           Text(
             'POMODORO',
             style: Theme.of(context).textTheme.headlineLarge?.copyWith(
@@ -42,7 +42,7 @@ class DisplayHeader extends StatelessWidget {
               ' – ${timeFormat.format(DateTime(0, 0, 0, workHours.endHour, workHours.endMinute))}',
               style: Theme.of(context).textTheme.bodyLarge,
             ),
-          const SizedBox(width: 40),
+          const SizedBox(width: 24),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
