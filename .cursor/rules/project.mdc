@@ -1,0 +1,249 @@
+---
+
+description: Project-wide rules for the existing Pomodoro Display Flutter application
+alwaysApply: true
+-----------------
+
+# Pomodoro Display — Project Rules
+
+## Project context
+
+This is an existing Flutter application called Pomodoro Display.
+
+The application is primarily a read-only display/kiosk application that reads reservation data from the existing Firebase/Firestore backend and displays the current schedule by runway.
+
+The application must continue to work with the existing Firebase project and existing Firestore data structure.
+
+Do not treat this as a new Flutter project. Preserve the existing architecture and conventions unless there is a clear reason to change them.
+
+## Architecture
+
+The current architecture consists primarily of:
+
+* `lib/data/` — data models, Firestore constants and repositories
+* `lib/presentation/` — screens, widgets and presentation/state logic
+* `lib/app/` — application theme and visual configuration
+
+The project currently uses:
+
+* Flutter
+* Provider
+* ChangeNotifier
+* Cloud Firestore
+* Firebase Core
+
+Do not introduce Riverpod, Bloc, GetX, GetIt, injectable or another state-management/dependency-injection framework unless explicitly requested.
+
+Prefer extending the existing architecture over introducing a new architecture.
+
+## State management
+
+`DisplayController` is the central state holder for the display application.
+
+Use the existing Provider + ChangeNotifier approach.
+
+Before introducing new state-management mechanisms, determine whether the existing `DisplayController` can appropriately handle the requirement.
+
+Avoid putting substantial business logic directly into UI widgets.
+
+## Firebase and Firestore
+
+The application uses the existing Firebase project:
+
+`pomodoro-62cae`
+
+Firestore is the source of reservation data.
+
+Important existing collections include:
+
+* `reservations`
+* `work_hours`
+* `channels`
+
+The application is currently intended to be read-only.
+
+Do NOT add Firestore write operations (`set`, `add`, `update`, `delete`) unless explicitly requested.
+
+Do NOT change the Firestore schema unless explicitly requested.
+
+Do NOT create a new Firebase project.
+
+Do NOT replace the existing Firebase architecture.
+
+Do NOT modify Firestore security rules unless explicitly requested.
+
+Do NOT change Firebase configuration files simply to "clean up" the project.
+
+If a Firebase configuration problem is discovered, explain the problem and proposed solution before modifying anything.
+
+## Existing data models
+
+Important existing models include:
+
+* `Reservation`
+* `ReservationService`
+* `UserVehicle`
+* `WorkHours`
+
+Use these models when appropriate instead of creating duplicate representations of the same data.
+
+Before creating a new model, check whether an existing model can be extended.
+
+## Repositories
+
+Existing repositories include:
+
+* `ReservationRepository`
+* `WorkHoursRepository`
+* `ChannelRepository`
+
+Use the repository layer for Firestore access.
+
+Do not access Firestore directly from UI widgets.
+
+If a new Firestore query is required, preferably implement it in the appropriate repository rather than inside a widget or presentation component.
+
+## Reservation logic
+
+Reservation status is determined by the existing `Reservation` methods and `DisplayController` logic.
+
+Existing concepts include:
+
+* active
+* upcoming
+* completed
+
+Do not duplicate reservation-status calculations in UI widgets.
+
+When changing reservation timing logic, carefully consider:
+
+* `reservedAt`
+* `duration`
+* `endsAt`
+* current time (`_now`)
+* day boundaries
+* runway grouping
+
+## UI
+
+The current application is primarily a display/kiosk interface.
+
+Important existing UI components include:
+
+* `DisplayScreen`
+* `DisplayHeader`
+* `RunwayPanel`
+* `ReservationCard`
+
+Preserve the existing visual language and theme unless the task specifically requires a design change.
+
+Do not redesign unrelated parts of the UI while implementing a feature.
+
+Consider Windows 1920x1080 landscape usage as an important target.
+
+Maintain reasonable Web and Android compatibility unless the task is specifically platform-dependent.
+
+## Platform-specific code
+
+The application supports Windows, Web and Android.
+
+When adding platform-specific functionality, isolate it appropriately and do not break other supported platforms.
+
+Be particularly careful with:
+
+* Firebase configuration
+* `window_manager`
+* Windows-specific functionality
+* Android Firebase configuration
+* Web Firebase configuration
+
+## Changes and implementation strategy
+
+Before making a significant change:
+
+1. Inspect the relevant existing code.
+2. Identify which existing classes/files are affected.
+3. Explain the proposed approach.
+4. Prefer the smallest clean change that solves the problem.
+
+Do not refactor unrelated code while implementing a feature.
+
+Do not rename or move large numbers of files/classes unless explicitly requested or clearly necessary.
+
+Do not remove existing functionality unless explicitly requested.
+
+## Before modifying files
+
+For small, straightforward tasks, implementation can proceed directly after inspecting the relevant code.
+
+For larger or architectural changes:
+
+* explain the plan first
+* identify affected files
+* identify possible risks
+* wait for confirmation if the change could affect Firebase, Firestore schema, authentication, data compatibility, or major application architecture
+
+## Code quality
+
+Follow existing project conventions.
+
+Prefer:
+
+* clear names
+* small focused methods
+* null-safe Dart
+* reusable widgets
+* existing abstractions
+* minimal duplication
+
+Avoid unnecessary complexity.
+
+Do not add dependencies unless there is a clear benefit.
+
+If adding a dependency is proposed, explain why the existing dependencies cannot reasonably solve the requirement.
+
+## Testing and validation
+
+After making code changes:
+
+1. Run `flutter analyze`.
+2. Run relevant tests if they exist.
+3. If practical, verify the affected screen/functionality on the target platform.
+
+Do not claim that something works without performing the appropriate validation.
+
+If tests cannot be run, clearly state that.
+
+When changing business logic, consider adding or updating tests for the changed behavior.
+
+## Important Firebase safety rule
+
+Never make assumptions about production Firebase data.
+
+Do not:
+
+* delete Firestore data
+* modify Firestore documents
+* change collection names
+* change field names
+* migrate data
+* change security rules
+* change Firebase project configuration
+
+unless the user explicitly requests it.
+
+If a requested feature appears to require one of these changes, explain the requirement and its consequences before proceeding.
+
+## Communication
+
+When working on a task:
+
+* First understand the existing implementation.
+* Explain important assumptions.
+* Make focused changes.
+* Summarize what was changed.
+* Mention which files were modified.
+* Report any validation performed.
+* Mention any remaining concerns or limitations.
+
+If something cannot be determined reliably from the code, say so rather than guessing.
