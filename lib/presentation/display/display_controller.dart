@@ -7,8 +7,12 @@ import 'package:pomodoro_windows/data/models/work_hours.dart';
 import 'package:pomodoro_windows/data/repositories/channel_repository.dart';
 import 'package:pomodoro_windows/data/repositories/reservation_repository.dart';
 import 'package:pomodoro_windows/data/repositories/work_hours_repository.dart';
+import 'package:pomodoro_windows/services/new_reservation_detector.dart';
+import 'package:pomodoro_windows/services/reservation_sound_service.dart';
 
 enum ReservationStatus { active, upcoming, completed }
+
+enum DisplayViewMode { row, timeline }
 
 class RunwaySchedule {
   final String runwayId;
@@ -28,6 +32,8 @@ class DisplayController extends ChangeNotifier {
   final ReservationRepository _reservationRepository;
   final WorkHoursRepository _workHoursRepository;
   final ChannelRepository _channelRepository;
+  final NewReservationDetector _newReservationDetector;
+  final ReservationSoundService _reservationSoundService;
 
   StreamSubscription<List<Reservation>>? _reservationSubscription;
   Timer? _clockTimer;
@@ -35,25 +41,76 @@ class DisplayController extends ChangeNotifier {
   List<Reservation> _reservations = [];
   Map<String, WorkHours> _workHours = {};
   DateTime _now = DateTime.now();
+  DateTime _selectedDate = _dateOnly(DateTime.now());
   bool _loading = true;
   String? _error;
+  DisplayViewMode _viewMode = DisplayViewMode.row;
+
+  static DateTime _dateOnly(DateTime dateTime) =>
+      DateTime(dateTime.year, dateTime.month, dateTime.day);
+
+  static bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
 
   DisplayController({
     required ReservationRepository reservationRepository,
     required WorkHoursRepository workHoursRepository,
     required ChannelRepository channelRepository,
+    NewReservationDetector? newReservationDetector,
+    ReservationSoundService? reservationSoundService,
   })  : _reservationRepository = reservationRepository,
         _workHoursRepository = workHoursRepository,
-        _channelRepository = channelRepository;
+        _channelRepository = channelRepository,
+        _newReservationDetector =
+            newReservationDetector ?? NewReservationDetector(),
+        _reservationSoundService =
+            reservationSoundService ?? ReservationSoundService();
 
   List<Reservation> get reservations => _reservations;
   DateTime get now => _now;
+  DateTime get selectedDate => _selectedDate;
+  bool get isViewingToday => _isSameDay(_selectedDate, _now);
   bool get loading => _loading;
   String? get error => _error;
+  DisplayViewMode get viewMode => _viewMode;
+
+  void selectDate(DateTime date) {
+    final normalized = _dateOnly(date);
+    final today = _dateOnly(DateTime.now());
+    if (normalized.isBefore(today) || _selectedDate == normalized) {
+      return;
+    }
+
+    _selectedDate = normalized;
+    _newReservationDetector.reset();
+    _loading = true;
+    _watchReservations();
+    notifyListeners();
+  }
+
+  void goToToday() {
+    final today = _dateOnly(DateTime.now());
+    if (_selectedDate == today) return;
+
+    _selectedDate = today;
+    _newReservationDetector.reset();
+    _loading = true;
+    _watchReservations();
+    notifyListeners();
+  }
+
+  void setViewMode(DisplayViewMode mode) {
+    if (_viewMode == mode) return;
+    _viewMode = mode;
+    notifyListeners();
+  }
+
+  ReservationStatus statusFor(Reservation reservation) =>
+      _statusFor(reservation);
 
   WorkHours? get todayWorkHours {
     if (_workHours.isEmpty) return null;
-    final weekdayIndex = (_now.weekday - 1).toString();
+    final weekdayIndex = (_selectedDate.weekday - 1).toString();
     return _workHours[weekdayIndex];
   }
 
@@ -123,12 +180,19 @@ class DisplayController extends ChangeNotifier {
     _reservationSubscription?.cancel();
 
     _reservationSubscription =
-        _reservationRepository.watchDayReservations(_now).listen(
+        _reservationRepository.watchDayReservations(_selectedDate).listen(
       (reservations) {
+        final shouldPlaySound = isViewingToday &&
+            _newReservationDetector.processSnapshot(reservations);
+
         _reservations = reservations;
         _loading = false;
         _error = null;
         notifyListeners();
+
+        if (shouldPlaySound) {
+          _reservationSoundService.playNewReservationNotification();
+        }
       },
       onError: (Object e) {
         _loading = false;
@@ -158,6 +222,7 @@ class DisplayController extends ChangeNotifier {
     _reservationSubscription?.cancel();
     _clockTimer?.cancel();
     _channelRepository.dispose();
+    _reservationSoundService.dispose();
     super.dispose();
   }
 }

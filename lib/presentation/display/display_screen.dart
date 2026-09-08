@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import 'package:pomodoro_windows/app/theme.dart';
 import 'package:pomodoro_windows/presentation/display/display_controller.dart';
 import 'package:pomodoro_windows/presentation/widgets/display_header.dart';
-import 'package:pomodoro_windows/presentation/widgets/runway_panel.dart';
+import 'package:pomodoro_windows/presentation/widgets/row_schedule_view.dart';
+import 'package:pomodoro_windows/presentation/widgets/timeline/timeline_schedule_view.dart';
 import 'package:provider/provider.dart';
 
 class DisplayScreen extends StatefulWidget {
@@ -30,36 +32,11 @@ class _DisplayScreenState extends State<DisplayScreen> {
     return Scaffold(
       body: Consumer<DisplayController>(
         builder: (context, controller, _) {
-          if (controller.loading) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.accent),
-            );
-          }
-
-          if (controller.error != null) {
-            return _ErrorView(message: controller.error!);
-          }
-
-          final schedules = controller.runwaySchedules;
-
           return Column(
             children: [
               const DisplayHeader(),
               Expanded(
-                child: schedules.isEmpty
-                    ? _EmptyDayView()
-                    : Padding(
-                        padding: const EdgeInsets.all(14),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            for (var i = 0; i < schedules.length; i++) ...[
-                              if (i > 0) const SizedBox(width: 12),
-                              Expanded(child: RunwayPanel(schedule: schedules[i])),
-                            ],
-                          ],
-                        ),
-                      ),
+                child: _buildBody(context, controller),
               ),
             ],
           );
@@ -67,11 +44,53 @@ class _DisplayScreenState extends State<DisplayScreen> {
       ),
     );
   }
+
+  Widget _buildBody(BuildContext context, DisplayController controller) {
+    if (controller.loading) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.accent),
+      );
+    }
+
+    if (controller.error != null) {
+      return _ErrorView(message: controller.error!);
+    }
+
+    final schedules = controller.runwaySchedules;
+    final hasReservations = schedules.isNotEmpty;
+
+    if (!hasReservations) {
+      return _EmptyDayView(
+        selectedDate: controller.selectedDate,
+        isViewingToday: controller.isViewingToday,
+      );
+    }
+
+    return switch (controller.viewMode) {
+      DisplayViewMode.row => RowScheduleView(schedules: schedules),
+      DisplayViewMode.timeline => TimelineScheduleView(
+          key: ValueKey(controller.selectedDate),
+        ),
+    };
+  }
 }
 
 class _EmptyDayView extends StatelessWidget {
+  final DateTime selectedDate;
+  final bool isViewingToday;
+
+  const _EmptyDayView({
+    required this.selectedDate,
+    required this.isViewingToday,
+  });
+
   @override
   Widget build(BuildContext context) {
+    final dateFormat = DateFormat('EEEE, d. MMMM yyyy.', 'bs');
+    final message = isViewingToday
+        ? 'Nema rezervacija za danas'
+        : 'Nema rezervacija za ${dateFormat.format(selectedDate)}';
+
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -83,10 +102,11 @@ class _EmptyDayView extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Nema rezervacija za danas',
+            message,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   color: AppColors.textSecondary,
                 ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
